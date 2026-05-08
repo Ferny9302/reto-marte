@@ -16,6 +16,7 @@ function Dashboard() {
   const [activeSection, setActiveSection] = React.useState('dashboard');
   const [activeMap, setActiveMap] = React.useState('mars');
   const [iaLoading, setIaLoading] = React.useState(false);
+  const [sysAlert, setSysAlert] = React.useState({ open: false, title: '', message: '' });
 
   const triggerIA = async () => {
     try {
@@ -28,11 +29,21 @@ function Dashboard() {
         setRouteStatus('planificada');
       }
 
-      alert('IA de Remediación activada: Se han asignado rutas a los robots disponibles para limpiar las zonas tóxicas.');
-      // Force map refresh
+      // Reemplazamos el alert de éxito:
+      setSysAlert({ 
+        open: true, 
+        title: 'IA Activada', 
+        message: 'Se han asignado rutas a los robots disponibles para limpiar las zonas tóxicas.' 
+      });
+      
       setRobotsRefreshToken(v => v + 1);
     } catch (err) {
-      alert(err.message);
+      // Reemplazamos el alert de error:
+      setSysAlert({ 
+        open: true, 
+        title: 'Atención', 
+        message: err.message 
+      });
     } finally {
       setIaLoading(false);
     }
@@ -149,6 +160,8 @@ function Dashboard() {
             <p className="state-msg">Aqui puedes ajustar la mision, los mapas y la simulacion. Por ahora la accion visible es navegar a los bloques principales.</p>
           </section>
         </main>
+       
+
         <GenerateRutaModal
           open={modalOpen}
           onClose={() => setModalOpen(false)}
@@ -165,9 +178,36 @@ function Dashboard() {
             scrollToSection('robots');
           }}
         />
-      </div>
-    </div>
-  );
+
+        {/* EL MODAL DE ALERTA DEBE IR AQUÍ ADENTRO */}
+        {sysAlert.open && (
+          <div className="modal-backdrop" style={{ zIndex: 3000 }}>
+            <div className="modal" style={{ maxWidth: '400px', textAlign: 'center', padding: '30px' }}>
+              <h3 style={{ 
+                borderBottom: 'none', 
+                marginBottom: '16px', 
+                color: sysAlert.title === 'Atención' ? '#ff7070' : 'var(--accent)' 
+              }}>
+                {sysAlert.title}
+              </h3>
+              <p style={{ color: 'var(--text)', fontSize: '15px', marginBottom: '24px', lineHeight: '1.5' }}>
+                {sysAlert.message}
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <button 
+                  className="btn-primary" 
+                  onClick={() => setSysAlert({ ...sysAlert, open: false })}
+                >
+                  Enterado
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div> 
+    </div> 
+  ); 
 }
 
 export default Dashboard;
